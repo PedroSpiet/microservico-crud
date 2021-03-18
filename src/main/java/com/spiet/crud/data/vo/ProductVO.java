@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.spiet.crud.entities.Product;
 import lombok.*;
 import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -18,8 +19,8 @@ import java.io.Serializable;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-public class ProductVO implements Serializable {
+@EqualsAndHashCode(callSuper = false)
+public class ProductVO extends RepresentationModel<ProductVO> implements Serializable {
 
     private static final long serialVersionUID = -3596714608156597250L;
 
