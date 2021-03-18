@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,22 +37,25 @@ public class ProductController {
         return productVO;
     }
 
-    @GetMapping(produces = {"application/json", "application/xml", "application/x-yaml",})
+    @GetMapping(produces = {"application/json","application/xml","application/x-yaml"})
     public ResponseEntity<?> findAll(@RequestParam(value = "page", defaultValue = "0") int page,
                                      @RequestParam(value = "limit", defaultValue = "12") int limit,
-                                     @RequestParam(value = "direction", defaultValue = "asc") String direction)
-    {
+                                     @RequestParam(value = "direction", defaultValue = "asc") String direction) {
+
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
 
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection));
+        Pageable pageable = PageRequest.of(page,limit, Sort.by(sortDirection,"name"));
 
-        Page<ProductVO> products = service.findAll(pageable);
-        products.stream().forEach(p -> p.add(linkTo(methodOn(ProductController.class).findById(p.getId())).withSelfRel()));
-        PagedModel<EntityModel<ProductVO>> pagedModel = assembler.toModel(products);
+        Page<ProductVO> produtos = service.findAll(pageable);
+        produtos.stream()
+                .forEach(p -> p.add(linkTo(methodOn(ProductController.class).findById(p.getId())).withSelfRel()));
 
-        return ResponseEntity.ok().body(pagedModel);
+        PagedModel<EntityModel<ProductVO>> pagedModel = assembler.toModel(produtos);
+
+        return new ResponseEntity<>(pagedModel, HttpStatus.OK);
     }
 
+    @PostMapping
     public ProductVO create(@RequestBody ProductVO produtoVO) {
         ProductVO proVo = service.create(produtoVO);
         proVo.add(linkTo(methodOn(ProductController.class).findById(proVo.getId())).withSelfRel());
